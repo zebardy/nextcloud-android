@@ -69,6 +69,10 @@ if (taskRequest.contains("Gplay") || taskRequest.contains("findbugs") || taskReq
 }
 
 android {
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     lintOptions {
         abortOnError false
         htmlReport true
