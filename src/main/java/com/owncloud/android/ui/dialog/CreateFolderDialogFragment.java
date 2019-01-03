@@ -24,7 +24,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -34,7 +33,6 @@ import android.widget.TextView;
 
 import com.owncloud.android.R;
 import com.owncloud.android.datamodel.OCFile;
-import com.owncloud.android.lib.resources.files.FileUtils;
 import com.owncloud.android.ui.activity.ComponentsGetter;
 import com.owncloud.android.ui.helpers.FileOperationsHelper;
 import com.owncloud.android.utils.DisplayUtils;
@@ -43,6 +41,7 @@ import com.owncloud.android.utils.ThemeUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 
 /**
  *  Dialog to input the name for a new folder to create.
@@ -155,18 +154,8 @@ public class CreateFolderDialogFragment
                 if (newFolderName.length() <= 0) {
                     throw new RuntimeException(String.valueOf(R.string.filename_empty));
                 }
-                boolean serverWithForbiddenChars = fileOperationsHelper.isVersionWithForbiddenCharacters();
+                boolean serverWithForbiddenChars = true;
 
-                if (!FileUtils.isValidName(newFolderName, serverWithForbiddenChars)) {
-
-                    if (serverWithForbiddenChars) {
-                        DisplayUtils.showSnackMessage(getActivity(), R.string.filename_forbidden_charaters_from_server);
-                    } else {
-                        DisplayUtils.showSnackMessage(getActivity(), R.string.filename_forbidden_characters);
-                    }
-
-                    return;
-                }
 
                 String path = mParentFolder.getRemotePath();
                 path += newFolderName + OCFile.PATH_SEPARATOR;
