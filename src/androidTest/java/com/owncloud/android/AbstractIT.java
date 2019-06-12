@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import com.owncloud.android.utils.FileStorageUtils;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -29,6 +29,10 @@ import java.io.IOException;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 
 
 /**
@@ -54,6 +58,7 @@ public abstract class AbstractIT {
 
             Account temp = new Account(loginName + "@" + baseUrl, MainApp.getAccountType(targetContext));
             UserAccountManager accountManager = UserAccountManagerImpl.fromContext(targetContext);
+
             if (!accountManager.exists(temp)) {
                 AccountManager platformAccountManager = AccountManager.get(targetContext);
                 platformAccountManager.addAccountExplicitly(temp, password, null);
@@ -67,9 +72,8 @@ public abstract class AbstractIT {
             final UserAccountManager userAccountManager = UserAccountManagerImpl.fromContext(targetContext);
             account = userAccountManager.getAccountByName(loginName + "@" + baseUrl);
 
-            if (account == null) {
-                throw new ActivityNotFoundException();
-            }
+            assertNotNull("Account is null", account);
+            assertEquals("Not exactly one account provided", 1, accountManager.getAccounts().length);
 
             client = OwnCloudClientFactory.createOwnCloudClient(account, targetContext);
 
@@ -85,6 +89,12 @@ public abstract class AbstractIT {
         } catch (AccountUtils.AccountNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        UserAccountManager accountManager = UserAccountManagerImpl.fromContext(targetContext);
+        accountManager.removeAllAccounts();
     }
 
     FileDataStorageManager getStorageManager() {
@@ -110,6 +120,8 @@ public abstract class AbstractIT {
         }
         writer.flush();
         writer.close();
+
+        assertTrue("File " + name + " does not exists", file.exists());
     }
 
     private static void waitForServer(OwnCloudClient client, Uri baseUrl) {
