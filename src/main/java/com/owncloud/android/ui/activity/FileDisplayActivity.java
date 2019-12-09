@@ -1050,8 +1050,7 @@ public class FileDisplayActivity extends FileActivity
                     break;
             }
 
-            FileUploader.UploadRequester requester = new FileUploader.UploadRequester();
-            requester.uploadNewFile(
+            FileUploader.uploadNewFile(
                 this,
                 getAccount(),
                 filePaths,
@@ -1061,7 +1060,8 @@ public class FileDisplayActivity extends FileActivity
                 false,          // do not create parent folder if not existent
                 UploadFileOperation.CREATED_BY_USER,
                 false,
-                false
+                false,
+                FileUploader.NameCollisionPolicy.ASK_USER
             );
 
         } else {
