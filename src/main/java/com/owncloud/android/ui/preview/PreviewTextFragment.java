@@ -21,15 +21,18 @@ package com.owncloud.android.ui.preview;
 
 import android.accounts.Account;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nextcloud.client.account.UserAccountManager;
 import com.nextcloud.client.di.Injectable;
@@ -75,6 +79,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.core.MarkwonTheme;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
@@ -290,6 +295,19 @@ public class PreviewTextFragment extends FileFragment implements SearchView.OnQu
                     TextPaint textPaint = new TextPaint();
                     textPaint.setColorFilter(new PorterDuffColorFilter(ThemeUtils.primaryColor(context), PorterDuff.Mode.SRC_ATOP));
                     builder.linkColor(ThemeUtils.primaryColor(context, true));
+                }
+
+                @Override
+                public void configureConfiguration(@NonNull MarkwonConfiguration.Builder builder) {
+                    builder.linkResolver((view, link) -> {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                            DisplayUtils.startIntentIfAppAvailable(intent, getActivity(), R.string.no_browser_available);
+                        } catch (Throwable throwable) {
+                            Toast.makeText(context, R.string.error_opening_link, Toast.LENGTH_SHORT).show();
+                        }
+
+                    });
                 }
             })
             .usePlugin(TablePlugin.create(context))
@@ -558,6 +576,7 @@ public class PreviewTextFragment extends FileFragment implements SearchView.OnQu
 
     private void setText(TextView textView, String text, OCFile file) {
         if (MimeTypeUtil.MIMETYPE_TEXT_MARKDOWN.equals(file.getMimeType())) {
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
             textView.setText(getRenderedMarkdownText(getContext(), text));
         } else {
             textView.setText(text);
