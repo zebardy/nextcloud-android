@@ -28,7 +28,6 @@ package com.owncloud.android.ui.activity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -518,7 +517,7 @@ public abstract class DrawerActivity extends ToolbarActivity
                     firstRunIntent.putExtra(FirstRunActivity.EXTRA_ALLOW_CLOSE, true);
                     startActivity(firstRunIntent);
                 } else {
-                    createAccount(false);
+                    startAccountCreation();
                 }
                 break;
 
@@ -1361,12 +1360,13 @@ public abstract class DrawerActivity extends ToolbarActivity
      */
     protected abstract void restart();
 
-    @Override
-    protected void onAccountCreationSuccessful(AccountManagerFuture<Bundle> future) {
-        super.onAccountCreationSuccessful(future);
-        updateAccountList();
-        restart();
-    }
+//    @Override
+//    protected void onAccountCreationSuccessful(AccountManagerFuture<Bundle> future) {
+//        super.onAccountCreationSuccessful(future);
+//        Log.d("mytag", "DrawerActivity.onAccountCreationSuccessful()");
+//        updateAccountList();
+//        restart();
+//    }
 
     /**
      * Get list of users suitable for displaying in navigation drawer heder.

@@ -22,14 +22,25 @@ package com.nextcloud.client.account;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.nextcloud.client.core.AsyncRunner;
+import com.nextcloud.client.core.ThreadPoolAsyncRunner;
 import com.nextcloud.java.util.Optional;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
+import com.owncloud.android.authentication.AuthenticatorActivity;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.OwnCloudAccount;
@@ -42,6 +53,7 @@ import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.lib.resources.status.OwnCloudVersion;
 import com.owncloud.android.lib.resources.users.GetUserInfoRemoteOperation;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +62,8 @@ import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public class UserAccountManagerImpl implements UserAccountManager {
 
@@ -379,5 +393,16 @@ public class UserAccountManagerImpl implements UserAccountManager {
 
     private String getAccountType() {
         return context.getString(R.string.account_type);
+    }
+
+    @Override
+    public void startAccountCreation(final Activity activity) {
+        accountManager.addAccount(getAccountType(),
+                                  null,
+                                  null,
+                                  null,
+                                  activity,
+                                  null,
+                                  null);
     }
 }
