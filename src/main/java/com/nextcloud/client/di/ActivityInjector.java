@@ -23,6 +23,7 @@ package com.nextcloud.client.di;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -32,6 +33,7 @@ public class ActivityInjector implements Application.ActivityLifecycleCallbacks 
 
     @Override
     public final void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityCreated(): %s", activity));
         if (activity instanceof Injectable) {
             AndroidInjection.inject(activity);
         }
@@ -44,32 +46,37 @@ public class ActivityInjector implements Application.ActivityLifecycleCallbacks 
 
     @Override
     public final void onActivityStarted(Activity activity) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityStarted(): %s", activity));
         // not needed
     }
 
     @Override
     public final void onActivityResumed(Activity activity) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityResumed(): %s", activity));
         // not needed
     }
 
     @Override
     public final void onActivityPaused(Activity activity) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityPaused(): %s", activity));
         // not needed
     }
 
     @Override
     public final void onActivityStopped(Activity activity) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityStopped(): %s", activity));
         // not needed
     }
 
     @Override
     public final void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        Log.d("mytag", String.format("ActivityInjector.onActivitySaveInstanceState(): %s", activity));
         // not needed
     }
 
     @Override
     public final void onActivityDestroyed(Activity activity) {
+        Log.d("mytag", String.format("ActivityInjector.onActivityDestroyed(): %s", activity));
         // not needed
     }
 }
-

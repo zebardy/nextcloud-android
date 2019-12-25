@@ -45,6 +45,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -228,14 +229,19 @@ public class FileDisplayActivity extends FileActivity
     ConnectivityService connectivityService;
 
     @Override
+    public void finish() {
+        super.finish();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log_OC.v(TAG, "onCreate() start");
-
+        Log.d("mytag", "FileDisplayActivity.onCreate(): before super");
         // Set the default theme to replace the launch screen theme.
         setTheme(R.style.Theme_ownCloud_Toolbar_Drawer);
 
         super.onCreate(savedInstanceState);
-
+        Log.d("mytag", "FileDisplayActivity.onCreate(): after super");
         /// Load of saved instance state
         if (savedInstanceState != null) {
             mWaitingToPreview = savedInstanceState.getParcelable(FileDisplayActivity.KEY_WAITING_TO_PREVIEW);
