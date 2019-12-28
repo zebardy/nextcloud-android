@@ -1,2 +1,7 @@
 include ':'
 //include 'nextcloud-android-library'
+//sourceControl {
+//    gitRepository("https://github.com/zebardy/nextcloud-android-library.git") {
+//        producesModule("com.github.nextcloud:android-library")
+//    }
+//}
