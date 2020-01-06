@@ -109,6 +109,7 @@ shot {
 }
 
 android {
+
     lintOptions {
         abortOnError false
         htmlReport true
@@ -155,6 +156,7 @@ android {
         // see http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Configuring-the-Structure
 
         flavorDimensions "default"
+        signingConfig signingConfigs.debug
 
         buildTypes {
             debug {
@@ -263,7 +265,8 @@ android {
         }
     }
 
-    check.dependsOn 'checkstyle', 'spotbugsGplayDebug', 'pmd', 'lint', 'ktlint', 'detekt'
+    //check.dependsOn 'checkstyle', 'spotbugsGplayDebug', 'pmd', 'lint', 'ktlint', 'detekt'
+    check.dependsOn 'checkstyle', 'spotbugsGplayDebug', 'pmd', 'lint', 'detekt'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -273,15 +276,23 @@ android {
     dataBinding {
         enabled true
     }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
 }
 
 dependencies {
     // dependencies for app building
     implementation 'androidx.multidex:multidex:2.0.1'
-//    implementation project('nextcloud-android-library')
-    genericImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
-    gplayImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
-    versionDevImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
+    implementation project('nextcloud-android-library')
+//    genericImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
+//    gplayImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
+//    versionDevImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
     qaImplementation "com.github.nextcloud:android-library:$androidLibraryVersion"
     compileOnly 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2' // remove after entire switch to lib v2
     implementation "commons-httpclient:commons-httpclient:3.1@jar" // remove after entire switch to lib v2
@@ -426,19 +437,19 @@ tasks.register("combinedTestReport", JacocoReport) {
     ])
 }
 
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "--reporter=plain", "--reporter=plain,output=${buildDir}/ktlint.txt,src/**/*.kt"
-}
+//task ktlint(type: JavaExec, group: "verification") {
+//    description = "Check Kotlin code style."
+//    main = "com.pinterest.ktlint.Main"
+//    classpath = configurations.ktlint
+//    args "--reporter=plain", "--reporter=plain,output=${buildDir}/ktlint.txt,src/**/*.kt"
+//}
 
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
-}
+//task ktlintFormat(type: JavaExec, group: "formatting") {
+//    description = "Fix Kotlin code style deviations."
+//    main = "com.pinterest.ktlint.Main"
+//    classpath = configurations.ktlint
+//    args "-F", "src/**/*.kt"
+//}
 
 detekt {
     reports {

@@ -47,3 +47,8 @@ fastlane/Fastfile
 
 # scan temporary files
 **/fastlane/test_output
+
+
+.java-version
+versionDev
+nextcloud-android-library

@@ -63,6 +63,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
+import android.security.KeyChain;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -74,6 +75,7 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.ClientCertRequest;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.HttpAuthHandler;
@@ -101,6 +103,7 @@ import com.nextcloud.client.onboarding.OnboardingService;
 import com.nextcloud.client.preferences.AppPreferences;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
+import com.owncloud.android.lib.common.ClientCertificateCallback;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
 import com.owncloud.android.lib.common.OwnCloudCredentials;
@@ -108,6 +111,7 @@ import com.owncloud.android.lib.common.OwnCloudCredentialsFactory;
 import com.owncloud.android.lib.common.UserInfo;
 import com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException;
 import com.owncloud.android.lib.common.accounts.AccountUtils.Constants;
+import com.owncloud.android.lib.common.network.AdvancedX509KeyManager;
 import com.owncloud.android.lib.common.network.CertificateCombinedException;
 import com.owncloud.android.lib.common.network.NetworkUtils;
 import com.owncloud.android.lib.common.operations.OnRemoteOperationListener;
@@ -132,7 +136,9 @@ import com.owncloud.android.utils.PermissionUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -507,6 +513,15 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
                 } catch (Exception e) {
                     Log_OC.e(TAG, "Cert could not be verified");
                 }
+            }
+
+            @Override
+            public void onReceivedClientCertRequest(WebView view, final ClientCertRequest request) {
+                AdvancedX509KeyManager knownKeyManager = NetworkUtils.getKnownKeyManager();
+                X509Certificate[] mCertificates = knownKeyManager.getCertificateChain();
+                PrivateKey mPrivateKey = knownKeyManager.getPrivateKey();
+
+                request.proceed(mPrivateKey, mCertificates);
             }
 
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
@@ -1310,7 +1325,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
             webViewLoginMethod = mServerInfo.mVersion.isWebLoginSupported() && !forceOldLoginMethod;
 
             if (webViewUser != null && !webViewUser.isEmpty() &&
-                    webViewPassword != null && !webViewPassword.isEmpty()) {
+                webViewPassword != null && !webViewPassword.isEmpty()) {
                 checkBasicAuthorization(webViewUser, webViewPassword);
             } else if (webViewLoginMethod) {
                 // hide old login
@@ -1355,6 +1370,20 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         /// very special case (TODO: move to a common place for all the remote operations)
         if (result.getCode() == ResultCode.SSL_RECOVERABLE_PEER_UNVERIFIED) {
             showUntrustedCertDialog(result);
+        }
+        URI uri = URI.create(mServerInfo.mBaseUrl);
+
+        if (NetworkUtils.getKnownKeyManager() == null) {
+            Log_OC.d(TAG, "AARON: Attempt to get client cert for host: " + uri.getHost());
+            try {
+                ClientCertificateCallback clientCertificateActivity = new ClientCertificateCallback(getApplicationContext());
+                KeyChain.choosePrivateKeyAlias(this, clientCertificateActivity,
+                    new String[]{"RSA"}, null, uri.getHost(), uri.getPort(), null);
+            } catch (Exception e) {
+                Log_OC.d(TAG, "AARON: exception from KeyChain.choosePrivateKeyAlias - " + e.toString());
+                e.printStackTrace();
+                //Log_OC.d(TAG, "AARON: stack trace from KeyChain.choosePrivateKeyAlias - " + ExceptionUtils.getStackTrace(e));
+            }
         }
     }
 
@@ -1943,6 +1972,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
      */
     public void showUntrustedCertDialog(X509Certificate x509Certificate, SslError error, SslErrorHandler handler) {
         // Show a dialog with the certificate info
+
+        Log_OC.w(TAG, "1 showUntrustedCertDialog");
+        new Throwable().printStackTrace();
         SslUntrustedCertDialog dialog;
         if (x509Certificate == null) {
             dialog = SslUntrustedCertDialog.newInstanceForEmptySslError(error, handler);
@@ -1961,6 +1993,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
      */
     private void showUntrustedCertDialog(RemoteOperationResult result) {
         // Show a dialog with the certificate info
+        Log_OC.w(TAG, "2 showUntrustedCertDialog");
+        new Throwable().printStackTrace();
         SslUntrustedCertDialog dialog = SslUntrustedCertDialog.
                 newInstanceForFullSslError((CertificateCombinedException) result.getException());
         FragmentManager fm = getSupportFragmentManager();
